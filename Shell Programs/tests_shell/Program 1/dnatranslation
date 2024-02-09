@@ -1,0 +1,87 @@
+#Author:Nicolas Araya Ventura
+#Created on : Oct,4,2023
+#Description: Dna Trnaslation (Project )
+#!/bin/bash
+
+######Amino Acid Dictionary######
+declare -A Amino_Acids
+Amino_Acids[Phe/F]="TTC,TTT"
+Amino_Acids[Leu/L]="TTA,TTG,CTT,CTC,CTA,CTG"
+Amino_Acids[Ile/I]="ATT,ATC,ATA"
+Amino_Acids[Met/M]="ATG"
+Amino_Acids[Val/V]="GTT,GTC,GTA,GTG"
+Amino_Acids[Ser/S]="TCT,TCC,TCA,TCG"
+Amino_Acids[Pro/P]="CCT,CCC,CCA,CCG"
+Amino_Acids[Thr/T]="ACT,ACC,ACA,ACG"
+Amino_Acids[Ala/A]="GCT,GCC,GCA,GCG"
+Amino_Acids[Tyr/Y]="TAT,TAC"
+Amino_Acids[His/H]="CAC,CAT"
+Amino_Acids[Gln/Q]="CAA,CAG"
+Amino_Acids[Asn/N]="AAT,AAC"
+Amino_Acids[Lys/K]="AAA,AAG"
+Amino_Acids[Asp/D]="GAT,GAC"
+Amino_Acids[Glu/E]="GAA,GAG"
+Amino_Acids[Cys/C]="TGT,TGC,TGC"
+Amino_Acids[Trp/W]="TGG"
+Amino_Acids[Arg/R]="CGT,CGC,CGA,CGG"
+Amino_Acids[Ser2/S]="AGT,AGC"
+Amino_Acids[Arg/R]="AGA,AGG"
+Amino_Acids[Gly/G]="GGT,GGC,GGA,GGG"
+##########################
+#Error Checks
+if  [ -z "$#" ]; then
+    echo "No file has been presented, Usage: <dnafile>"
+        exit
+fi
+
+if [ ! -f "$1" ] || [ ! -r "$1" ]; then
+    echo "Cannot open $1 for reading"
+    exit
+fi
+
+if [ -z "$1" ]; then
+    echo "Error: DNA file path is empty"
+    exit
+fi
+# Extract codons from the DNA file
+CODONS=$(tr -cd 'actgACTG' < "$1" | fold -w 3 | tr '[:lower:]' '[:upper:]' | sort | uniq -c)
+codseq=$(tr -cd 'actgACTG' < "$1" | fold -w 3 | tr '[:lower:]' '[:upper:]' | tr '\n' ' ')
+amiseq=""
+while IFS= read -r -n3 codon; do
+    for amino in "${!Amino_Acids[@]}"; do
+        IFS=',' read -ra codons <<< "${Amino_Acids[$amino]}"
+        for ac in "${codons[@]}"; do
+            if [[ "$ac" == "$codon" ]]; then
+                amiseq+="$amino "
+                unique_amino_acids+=("$amino")
+                break
+            fi
+        done
+    done
+done < <(tr -cd 'actgACTG' < "$1" | fold -w 3 | tr '[:lower:]' '[:upper:]')
+# Iterate through amino acids and count associated codons
+for amino in "${!Amino_Acids[@]}"; do
+    codons="${Amino_Acids[$amino]}"
+    count=0  # Initialize the count for this amino acid
+    for codon in $(echo "$codons" | tr ',' ' '); do
+        current_count=$(grep -F " ${codon^^}" <<< "$CODONS" | awk '{print $1}')
+        if [ -n "$current_count" ]; then
+            count=$((count + current_count))
+        fi
+    done
+
+    if [ "$count" -gt 0 ]; then
+        accumulated_counts+="$count $amino\n"
+        unique_amino_acids+=("$amino")  # Store the unique amino acids
+    fi
+done
+
+# Find total count of DNA bases
+basecount=$(tr -cd 'actgACTG' < "$1" | wc -c)
+# Find toatl count of different amino acids
+unique_amino_acids_count=$(printf "%s\n" "${unique_amino_acids[@]}" | sort -u | wc -l)
+
+# Print accumulated counts after the loop has finished
+if [ -n "$accumulated_counts" ]; then
+    echo -e "Codon Sequence:\n$codseq\n\nAmino Acid Sequence:\n$amiseq\n\nNumber of Bases: $basecount\n\nAmino Acid counts:\n$accumulated_counts\n\nThey're $unique_amino_acids_count different Amino acids!"
+fi

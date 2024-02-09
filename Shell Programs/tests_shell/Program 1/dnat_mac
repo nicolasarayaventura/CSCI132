@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Amino Acid Dictionary
+declare -A Amino_Acids
+Amino_Acids[Phe/F]="TTC,TTT"
+Amino_Acids[Leu/L]="TTA,TTG,CTT,CTC,CTA,CTG"
+Amino_Acids[Ile/I]="ATT,ATC,ATA"
+Amino_Acids[Met/M]="ATG"
+Amino_Acids[Val/V]="GTT,GTC,GTA,GTG"
+Amino_Acids[Ser/S]="TCT,TCC,TCA,TCG"
+Amino_Acids[Pro/P]="CCT,CCC,CCA,CCG"
+Amino_Acids[Thr/T]="ACT,ACC,ACA,ACG"
+Amino_Acids[Ala/A]="GCT,GCC,GCA,GCG"
+Amino_Acids[Tyr/Y]="TAT,TAC"
+Amino_Acids[His/H]="CAC,CAT"
+Amino_Acids[Gln/Q]="CAA,CAG"
+Amino_Acids[Asn/N]="AAT,AAC"
+Amino_Acids[Lys/K]="AAA,AAG"
+Amino_Acids[Asp/D]="GAT,GAC"
+Amino_Acids[Glu/E]="GAA,GAG"
+Amino_Acids[Cys/C]="TGT,TGC,TGC"
+Amino_Acids[Trp/W]="TGG"
+Amino_Acids[Ser2/S]="AGT,AGC"
+Amino_Acids[Arg2/R]="AGA,AGG"
+Amino_Acids[Gly/G]="GGT,GGC,GGA,GGG"
+Amino_Acids[START]="ATG"
+Amino_Acids[stop1]="TAA"
+Amino_Acids[stop2]="TAG"
+Amino_Acids[stop3]="TGA"
+
+# Error Checks
+if [ -z "$1" ]; then
+    echo "No file has been presented, Usage: <dnafile>"
+    exit 1
+fi
+
+if [ ! -f "$1" ] || [ ! -r "$1" ]; then
+    echo "Cannot open $1 for reading"
+    exit 1
+fi
+
+# Extract codons from the DNA file and remove line breaks
+codseq=$(tr -cd 'actgACTG' < "$1" | tr -d '\n' | fold -w 3 | tr '[:lower:]' '[:upper:]')
+
+# Find all start positions
+start_positions=($(echo "$codseq" | grep -b -o "${Amino_Acids[START]}" | awk -F: '{print $1}'))
+
+# Check if start positions are found
+if [ -z "${start_positions[*]}" ]; then
+    echo "Error: Start codon not found in the file."
+    exit 1
+fi
+# Debugging: Print the extracted codon sequence
+echo "Codon sequence: $codseq"
+
+# Find all stop positions
+stop_positions=($(echo "$codseq" | grep -b -o -E "${Amino_Acids[stop1]}|${Amino_Acids[stop2]}|${Amino_Acids[stop3]}" | awk -F: '{print $1}'))
+
+# Debugging: Print the stop codons
+echo "Stop codons: ${Amino_Acids[stop1]}, ${Amino_Acids[stop2]}, ${Amino_Acids[stop3]}"
+
+# Check if stop positions are found
+if [ -z "${stop_positions[*]}" ]; then
+    echo "Error: Stop codon not found in the file."
+    exit 1
+fi
+# Echo all start and stop positions
+echo "Start positions:${start_positions[@]}"
+echo "Stop positions:${stop_positions[@]}"
+
+
+
+
+#####Only has to goto the first stop codon! fix

@@ -1,0 +1,36 @@
+# Find the first and last line numbers with lines starting with 'ATOM'
+start_line=$(grep -n '^ATOM' "$1" | head -n 1 | cut -d: -f1)
+end_line=$(grep -n '^ATOM' "$1" | tail -n 1 | cut -d: -f1)
+
+# Check if the file contains 'ATOM' lines
+if [[ -z $start_line || -z $end_line ]]; then
+    echo "Error: The file does not contain 'ATOM' lines."
+    exit 1
+fi
+
+# Prompt user to enter a list of three-letter residues separated by spaces
+read -p "Enter a list of three-letter residues separated by spaces: " residue_list
+
+# Check if the residue list is provided
+if [[ -z $residue_list ]]; then
+    echo "Error: No residue list provided."
+    exit 1
+fi
+
+# Process lines between start_line and end_line
+for residue_code in $residue_list; do
+    found_serial_numbers=false
+    echo "Here are the serial numbers for $residue_code:"
+    while IFS= read -r line; do
+        if [[ $line =~ ^ATOM && $(echo "$line" | awk '{print $4}') == "$residue_code" ]]; then
+            echo -n "$(echo "$line" | awk '{print $2}') "
+            found_serial_numbers=true
+        fi
+    done < <(sed -n "${start_line},${end_line}p" "$1")
+    
+    if [ "$found_serial_numbers" = false ]; then
+        echo "None found."
+    else
+        echo  # Move to the next line for the next residue if serial numbers were found
+    fi
+done

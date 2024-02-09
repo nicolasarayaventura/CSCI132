@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Find the first and last line numbers with lines starting with 'ATOM'
+start_line=$(grep -n '^ATOM' "$1" | head -n 1 | cut -d: -f1)
+end_line=$(grep -n '^ATOM' "$1" | tail -n 1 | cut -d: -f1)
+
+# Check if the file contains 'ATOM' lines
+if [[ -z $start_line || -z $end_line ]]; then
+    echo "Error: The file does not contain 'ATOM' lines."
+    exit 1
+fi
+
+# Prompt user to enter a list of element symbols separated by spaces
+read -p "Enter a list of element symbols separated by spaces: " element_list
+
+# Check if the element list is provided
+if [[ -z $element_list ]]; then
+    echo "Error: No element symbols provided."
+    exit 1
+fi
+
+# Process lines between start_line and end_line
+for element_symbol in $element_list; do
+    declare -a col2_array
+    found_serial_numbers=false
+    
+    while IFS= read -r line; do
+        if [[ $line =~ ^ATOM && $(echo "$line" | awk '{print $12}') == "$element_symbol" ]]; then
+            col2_array+=($(echo "$line" | awk '{print $2}'))
+            found_serial_numbers=true
+        fi
+    done < <(sed -n "${start_line},${end_line}p" "$1")
+    
+    # Display the integers on the same line
+    if [ "$found_serial_numbers" = true ]; then
+        echo -n "Here are the serial numbers for the element $element_symbol: "
+        echo -n "${col2_array[@]}" | tr ' ' ' '
+        echo  # Move to the next line for the next element symbol
+    else
+        echo "Error: No serial numbers found for the element '$element_symbol'."
+    fi
+done

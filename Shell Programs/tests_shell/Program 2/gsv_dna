@@ -1,0 +1,44 @@
+#Author:Nicolas Araya Ventura
+#Created on : Nov,1,2023
+#Description:Genomic Variations: Search for Motifs in DNA
+#!/bin/bash
+
+# Check if at least 2 files are provided
+if [ "$#" -lt 2 ]; then
+    echo "Need 2 or more files to compare. <Usage> <IMPORTANT: First file is always the reference file!> ./gsv_dna.sh file1 file2 [file3...]"
+    exit 1
+else
+    # Extract the reference file (the first file)
+    reference="$1"
+    shift  # Remove the reference file from the argument list
+
+    while [ "$#" -gt 0 ]; do
+        file="$1"
+        motif_length=10
+        motifs_ref=$(fold -w "$motif_length" "$reference")
+        motifs_file=$(fold -w "$motif_length" "$file")
+
+        differences=$(diff -y <(echo "$motifs_ref") <(echo "$motifs_file"))
+
+        echo "Reference File: $reference"
+        echo "Comparing DNA files: $file"
+        echo "Differences in DNA sequences motifs (length $motif_length):"
+        echo "$differences"
+
+        while true; do
+            read -p "Enter a query to search in motifs (or 'quit' to exit): " query
+
+            if [ "$query" = "quit" ]; then
+                break  # Exit the inner loop to move to the next file
+            fi
+
+            # Perform the search within the motifs and display positions
+            echo "$motifs_ref" | grep -b -o "$query" | awk -v motif_length="$motif_length" -v query="$query" '
+                { 
+                    printf "Query: %s found at position: %d in motif starting at position: %d\n", query, $1, int($1/motif_length)+1
+                }'
+        done
+
+        shift  # Move to the next file
+    done
+fi

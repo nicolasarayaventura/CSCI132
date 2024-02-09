@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# Amino Acid Dictionary
+declare -A Amino_Acids
+Amino_Acids[Phe/F]="TTC,TTT"
+Amino_Acids[Leu/L]="TTA,TTG,CTT,CTC,CTA,CTG"
+Amino_Acids[Ile/I]="ATT,ATC,ATA"
+Amino_Acids[Met/M]="ATG"
+Amino_Acids[Val/V]="GTT,GTC,GTA,GTG"
+Amino_Acids[Ser/S]="TCT,TCC,TCA,TCG,AGT,AGC"
+Amino_Acids[Pro/P]="CCT,CCC,CCA,CCG"
+Amino_Acids[Thr/T]="ACT,ACC,ACA,ACG"
+Amino_Acids[Ala/A]="GCT,GCC,GCA,GCG"
+Amino_Acids[Tyr/Y]="TAT,TAC"
+Amino_Acids[His/H]="CAC,CAT"
+Amino_Acids[Gln/Q]="CAA,CAG"
+Amino_Acids[Asn/N]="AAT,AAC"
+Amino_Acids[Lys/K]="AAA,AAG"
+Amino_Acids[Asp/D]="GAT,GAC"
+Amino_Acids[Glu/E]="GAA,GAG"
+Amino_Acids[Cys/C]="TGT,TGC,TGC"
+Amino_Acids[Trp/W]="TGG"
+Amino_Acids[Arg/R]="CGT,CGC,CGA,CGG,AGA,AGG"
+Amino_Acids[Gly/G]="GGT,GGC,GGA,GGG"
+Amino_Acids[stop1]="TAA"
+Amino_Acids[stop2]="TAG"
+Amino_Acids[stop3]="TGA"
+
+# Error Checks
+if [ -z "$1" ]; then
+    echo "No file has been presented, Usage: <dnafile>"
+    exit 1
+fi
+
+if [ ! -f "$1" ] || [ ! -r "$1" ]; then
+    echo "Cannot open $1 for reading"
+    exit 1
+fi
+
+# Extract codons from the DNA/FASTA file
+codseq=$(awk '/^>/ {next} {gsub(/[^actgACTG]/, ""); print}' "$1" | fold -w 3 | tr '[:lower:]' '[:upper:]')
+
+# Find the start position line number
+start_position=$(echo "$codseq" | grep -n -o "${Amino_Acids[Met/M]}" | cut -d':' -f1 | head -n 1)
+
+# Check if start position is found
+if [ -z "$start_position" ]; then
+    echo "Error: Start codon not found in the file."
+    exit 1
+fi
+
+# Find the stop position line number after the start position
+stop_position=$(echo "$codseq" | grep -n -o -E "${Amino_Acids[stop1]}|${Amino_Acids[stop2]}|${Amino_Acids[stop3]}" | cut -d':' -f1 | awk -v start="$start_position" '{if ($1 > start) print $1}' | head -n 1)
+
+# Check if stop position is found
+if [ -z "$stop_position" ]; then
+    echo "Error: Stop codon not found after the start codon in the file."
+    exit 1
+fi
+
+# Extract the sequence between start and stop positions using line numbers
+extracted_sequence=$(echo "$codseq" | sed -n "${start_position},${stop_position}p")
+
+# Convert extracted codons into amino acids
+amino_sequence=$(echo "$extracted_sequence" | tr '\n' ' ' | sed 's/ $//' | tr ' ' '\n' | grep -v -E "${Amino_Acids[stop1]}|${Amino_Acids[stop2]}|${Amino_Acids[stop3]}" | while read -r codon; do
+    for amino in "${!Amino_Acids[@]}"; do
+        IFS=',' read -ra codons <<< "${Amino_Acids[$amino]}"
+        for ac in "${codons[@]}"; do
+            if [[ "$ac" == "$codon" ]]; then
+                echo -n "$amino "
+                break
+            fi
+        done
+    done
+done)
+# Echo the amino acid sequence
+# Echo the amino acid sequence
+echo "File: $1"
+echo -e "Codon Sequence:"
+echo "$extracted_sequence" | sed '$d' | tr '\n' ' '
+codon_count=$(echo "$extracted_sequence" | wc -l)
+base_count=$(echo -n "$extracted_sequence" | tr -d '\n' | wc -c)
+echo -e "\n\nAmino Acid Sequence:\n$amino_sequence\n\nNumber of Codons Displayed: $codon_count\nNumber of Bases Displayed: $base_count"
