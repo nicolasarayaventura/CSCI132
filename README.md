@@ -1,7 +1,7 @@
 # CSCI132
  Practical UNIX and Programming
 #Table of Contents
- * [Description](##decscription )
+ * [Description](#decscription )
  * [Programs]
  * [DNA Translation]
  * [Genomic Variations: Search For Motifs in DNA]
