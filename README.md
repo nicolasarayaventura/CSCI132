@@ -3,9 +3,9 @@
 # Table of Contents
  * [Description](#Description)
  * [Programs](#programs)
- * [DNA Translation](#dna_translation)
- * [Genomic Variations Search: For Motifs in DNA](#genomic_variations:_search_for_motifs_in_dna)
- * [PDB Hisotgram](#pdb_histogram)
+ * [DNA Translation](#dna-translation)
+ * [Genomic Variations Search: For Motifs in DNA](#genomic-variations-search-for-motifs-in-dna)
+ * [PDB Hisotgram](#pdb-histogram)
  ## Description 
  * Project displays three seperate programs achieving different ways to extract, organize, and display data to user under different constrictions. Each project is written in either shell or python 3.
  ## Programs
@@ -41,4 +41,4 @@ Constraints:
 ## Genomic Variations: Search for Motifs in DNA
  2
 ## PDB Histogram
-3
+ 3
