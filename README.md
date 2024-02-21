@@ -40,8 +40,28 @@ Constraints:
 
 ### Genomic Variations: Search for Motifs in DNA
 Purpose:
-Usage:
+
+ * Display of the short recurring patterns in DNA
+
+Usage: 
+
+ Running program in shell:
+ 
+ `./prog_2_gsv.sh reference_file file2 [file3...]`
+
+ Running program in python3:
+
+  `./prog_2_gsv.py reference_file file2 [file3...]`
+  
 Constraints:  
+
+1. Directionality of DNA
+2. Central Dogma of Biology
+3. DNA Codons
+4. Start and Stop codons
+5. Pathname of 'DNA' file is only command line argument, text file or FASTA file.
+6. File must contain DNA string with no new line characters or white space characters of any kind within it
+   
 ### PDB Histogram
 Purpose:
 Usage:
