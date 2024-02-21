@@ -13,7 +13,7 @@
  * Genomic Variations: Search for Motifs in DNA
  * PDB Histogram
 
-## DNA Translation
+### DNA Translation
     
 Purpose:
 
@@ -38,7 +38,11 @@ Constraints:
 5. Pathname of 'DNA' file is only command line argument, text file or FASTA file.
 6. File must contain DNA string with no new line characters or white space characters of any kind within it
 
-## Genomic Variations: Search for Motifs in DNA
- 2
-## PDB Histogram
- 3
+### Genomic Variations: Search for Motifs in DNA
+Purpose:
+Usage:
+Constraints:  
+### PDB Histogram
+Purpose:
+Usage:
+Constraints:  
