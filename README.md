@@ -41,7 +41,7 @@ Constraints:
 ### Genomic Variations: Search for Motifs in DNA
 Purpose:
 
- * Display of the short recurring patterns in DNA
+ * Display of the short recurring patterns in DNA from two or more different files
 
 Usage: 
 
@@ -64,5 +64,17 @@ Constraints:
    
 ### PDB Histogram
 Purpose:
+ * A program to extract needed information to a user from a Protein Data Bank File
 Usage:
+
+ Running program in shell:
+ 
+`./prog_3_pdb.sh reference_file file2 [file3...]`
+
+ Running program in python3: 
+
+ `./prog_3_pdb.py reference_file file2 [file3...]`
+ 
 Constraints:  
+ 1. PDB Files
+ 2. File Reading
