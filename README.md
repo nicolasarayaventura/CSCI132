@@ -52,6 +52,15 @@ Usage:
  Running program in python3:
 
   `./prog_2_gsv.py reference_file file2 [file3...]`
+
+ Python3 Version:
+ 
+ * '+' indicates that the motif is present only in the file being compared (not in the reference file).
+ * '-' indicates that the motif is present only in the reference file (not in the comparison file).
+ * '?' indicates that the comparison is inconclusive due to an ambiguous difference between the reference and comparison files.
+ * '^' marks the position in the motif where the difference occurs.
+
+Motifs from the reference file and the comparison file are aligned side by side, separated by tabs.
   
 Constraints:  
 
